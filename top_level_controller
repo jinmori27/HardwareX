@@ -1,0 +1,56 @@
+`timescale 1ns / 1ps
+
+module tb_top_level;
+
+
+    reg clk;
+    reg reset_btn;
+    reg [15:0] sw;
+    reg btnC; 
+    reg btnU; 
+    reg btnD; 
+    wire [15:0] led;
+    wire buzzer_out;
+    top_level_controller uut (
+        .clk(clk), 
+        .reset_btn(reset_btn), 
+        .sw(sw), 
+        .btnC(btnC), 
+        .btnU(btnU), 
+        .btnD(btnD), 
+        .led(led), 
+        .buzzer_out(buzzer_out)
+    );
+    defparam uut.timer_inst.CLOCK_FREQ = 10; 
+    always #5 clk = ~clk;
+
+    initial begin
+        clk = 0;
+        reset_btn = 1;
+        sw = 0;
+        btnC = 0;
+        btnU = 0;
+        btnD = 0;
+        #100;
+        reset_btn = 0;
+        #100;
+        sw[7:0] = 8'd30;
+        #20;
+        btnU = 1; 
+        #50;
+        btnU = 0; 
+        #50;
+        sw[15:8] = 8'd40; 
+        #200; 
+        #500;
+        sw[15:8] = 8'd0; 
+        #100;
+        
+        btnC = 1; 
+        #50;
+        btnC = 0; 
+        #500;
+        
+        $finish;
+    end
+endmodule

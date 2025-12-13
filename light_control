@@ -1,0 +1,29 @@
+`timescale 1ns / 1ps
+
+module light_controller (
+    input wire clk,
+    input wire reset,
+    input wire [7:0] light_level,      
+    input wire [7:0] light_threshold,  
+    output reg room_lights             t
+);
+
+    
+    parameter HYSTERESIS = 8'd5;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            room_lights <= 0;
+        end else begin
+            
+            if (light_level < light_threshold) begin
+                room_lights <= 1;
+            end
+            
+            else if (light_level > (light_threshold + HYSTERESIS)) begin
+                room_lights <= 0;
+            end
+            
+        end
+    end
+endmodule

@@ -1,0 +1,49 @@
+`timescale 1ns / 1ps
+
+module tb_temp_fan;
+
+    
+    reg clk;
+    reg reset;
+    reg tick_1hz;
+    reg [7:0] temp_value;
+    reg [7:0] temp_threshold;
+
+    
+    wire fan_on;
+    wire overheat_alarm;
+
+    
+    temp_fan_controller uut (
+        .clk(clk), 
+        .reset(reset), 
+        .tick_1hz(tick_1hz), 
+        .temp_value(temp_value), 
+        .temp_threshold(temp_threshold), 
+        .fan_on(fan_on), 
+        .overheat_alarm(overheat_alarm)
+    );
+
+    
+    always #5 clk = ~clk;
+
+    always #50 tick_1hz = ~tick_1hz; 
+
+    initial begin
+        clk = 0;
+        reset = 1;
+        tick_1hz = 0;
+        temp_value = 0;
+        temp_threshold = 8'd30;
+        #100;
+        reset = 0;
+        temp_value = 8'd25;
+        #200;
+        temp_value = 8'd35;
+        #500; 
+        temp_value = 8'd28;
+        #100;
+
+        $finish;
+    end
+endmodule

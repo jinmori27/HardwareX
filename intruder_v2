@@ -1,0 +1,54 @@
+`timescale 1ns / 1ps
+
+module intruder_alert_controller (
+    input wire clk,
+    input wire reset,
+    input wire motion_detected,
+    input wire tick_1hz,
+    input wire tick_blink,
+    input wire [3:0] user_code_input, 
+    input wire disarm_btn,            
+    output reg buzzer_on,
+    output reg [3:0] status_leds,     
+    output wire [3:0] challenge_leds  
+);
+
+    reg [1:0] alarm_timer;
+    reg alarm_active;
+
+    wire [3:0] required_code;
+
+
+    lfsr_generator lfsr_inst (
+        .clk(tick_1hz),     
+        .reset(reset),
+        .random_code(required_code)
+    );
+
+    
+    assign challenge_leds = (alarm_active) ? required_code : 4'b0000;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            buzzer_on <= 0;
+            status_leds <= 4'b0000;
+            alarm_active <= 0;
+            alarm_timer <= 0;
+        end else begin
+            if (motion_detected && !alarm_active) begin
+                alarm_active <= 1;
+            end
+            if (alarm_active && disarm_btn) begin
+                if (user_code_input == required_code) begin
+                    alarm_active <= 0;                end
+            end
+            if (alarm_active) begin
+                buzzer_on <= 1;
+                if (tick_blink) status_leds <= ~status_leds; 
+            end else begin
+                buzzer_on <= 0;
+                status_leds <= 4'b0000;
+            end
+        end
+    end
+endmodule

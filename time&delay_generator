@@ -1,0 +1,41 @@
+`timescale 1ns / 1ps
+
+module timer_counter (
+    input wire clk,          
+    input wire reset,        
+    output reg tick_1hz,     
+    output reg tick_blink    
+);
+
+    
+    parameter CLOCK_FREQ = 100_000_000; 
+    
+    integer counter_1s = 0;
+    integer counter_blink = 0;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            counter_1s <= 0;
+            tick_1hz <= 0;
+            counter_blink <= 0;
+            tick_blink <= 0;
+        end else begin
+            
+            if (counter_1s >= CLOCK_FREQ - 1) begin
+                counter_1s <= 0;
+                tick_1hz <= 1;  
+            end else begin
+                counter_1s <= counter_1s + 1;
+                tick_1hz <= 0;
+            end
+
+            
+            if (counter_blink >= (CLOCK_FREQ/4) - 1) begin
+                counter_blink <= 0;
+                tick_blink <= ~tick_blink;
+            end else begin
+                counter_blink <= counter_blink + 1;
+            end
+        end
+    end
+endmodule

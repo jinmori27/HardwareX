@@ -1,0 +1,50 @@
+`timescale 1ns / 1ps
+
+module temp_fan_controller (
+    input wire clk,                  
+    input wire reset,                / System Reset/
+    input wire tick_1hz,             
+    input wire [7:0] temp_value,     
+    input wire [7:0] temp_threshold, 
+    output reg fan_on,              
+    output reg overheat_alarm       
+);
+
+    
+    reg [1:0] alarm_timer; 
+    reg alarm_active;
+
+    always @(posedge clk or posedge reset) begin
+        if (reset) begin
+            fan_on <= 0;
+            overheat_alarm <= 0;
+            alarm_timer <= 0;
+            alarm_active <= 0;
+        end else begin
+            
+            if (temp_value > temp_threshold) begin
+                fan_on <= 1; 
+
+               
+                if (alarm_active == 0 && alarm_timer == 0) begin
+                    alarm_active <= 1;
+                    alarm_timer <= 2; 
+            end else begin
+                fan_on <= 0;
+                alarm_active <= 0;
+                alarm_timer <= 0;
+                overheat_alarm <= 0;
+            end
+            if (alarm_active) begin
+                if (alarm_timer > 0) begin
+                    overheat_alarm <= 1; 
+                    if (tick_1hz) begin 
+                        alarm_timer <= alarm_timer - 1;
+                    end
+                end else begin
+                    overheat_alarm <= 0; 
+                end
+            end
+        end
+    end
+endmodule
